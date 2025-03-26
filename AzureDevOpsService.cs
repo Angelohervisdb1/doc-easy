@@ -68,15 +68,16 @@ public class AzureDevOpsService
 
         foreach (var workItem in workItems)
         {
+            var isEpic = string.Equals(workItem.Campos.TipoWorkItem, "Epic", StringComparison.OrdinalIgnoreCase);
             var parentId = GetParentId(workItem, out var isChild);
 
-            if (isChild)
+            if (isEpic && !isChild)
             {
-                AddChildDeliverable(parents, parentId, workItem);
+                AddParentDeliverable(parents, workItem);
             }
             else
             {
-                AddParentDeliverable(parents, workItem);
+                AddChildDeliverable(parents, parentId, workItem);
             }
         }
 
@@ -91,8 +92,10 @@ public class AzureDevOpsService
         if (workItem.Relacionamentos == null) return parentId;
         foreach (var relation in workItem.Relacionamentos)
         {
-            if (relation.Relacionamento != "System.LinkTypes.Hierarchy-Reverse") continue;
-            parentId = int.TryParse(relation.Url.Split('/')[1], out var id) ? id : 0;
+            if (relation.Relacionamento != "System.LinkTypes.Hierarchy-Reverse")
+                continue;
+            
+            parentId = int.TryParse(relation.Url.Split('/')[^1], out var id) ? id : 0;
             isChild = true;
             break;
         }
@@ -114,22 +117,10 @@ public class AzureDevOpsService
             parents[parentId] = value;
         }
 
-        value.Children.Add(new Deliverable
-        {
-            Id = workItem.Id,
-            Titulo = workItem.Campos.Titulo,
-            Descricao = workItem.Campos.Descricao,
-            ParentId = parentId.ToString(),
-            Parent = false,
-            Tipo = Enum.TryParse<TipoWorkItem>(workItem.Campos.TipoWorkItem, out var tipo)
-                ? tipo
-                : TipoWorkItem.NaoMapeado,
-            Finalizado = workItem.Campos.ColunaFechado
-        });
+        value.Children.Add(CreateDeliverable(workItem, parentId));
     }
 
-    private static void AddParentDeliverable(Dictionary<int, ParentDeliverable> parents,
-        AzureDevOpsWorkItem workItem)
+    private static void AddParentDeliverable(Dictionary<int, ParentDeliverable> parents, AzureDevOpsWorkItem workItem)
     {
         if (!parents.ContainsKey(workItem.Id))
         {
@@ -140,5 +131,21 @@ public class AzureDevOpsService
                 Children = []
             };
         }
+    }
+
+    private static Deliverable CreateDeliverable(AzureDevOpsWorkItem workItem, int parentId)
+    {
+        return new Deliverable
+        {
+            Id = workItem.Id,
+            Titulo = workItem.Campos.Titulo,
+            Descricao = workItem.Campos.Descricao,
+            ParentId = parentId.ToString(),
+            Parent = false,
+            Tipo = Enum.TryParse<TipoWorkItem>(workItem.Campos.TipoWorkItem, out var tipo)
+                ? tipo
+                : TipoWorkItem.NaoMapeado,
+            Finalizado = workItem.Campos.ColunaFechado
+        };
     }
 }
