@@ -11,16 +11,38 @@ public class ChatGptService
     private const string ApiUrl = "https://api.aimlapi.com/v1/chat/completions";
 
     private const string InstrucaoSistema =
-        "Você é um assistente especializado em análise de requisitos e geração de documentação técnica. " +
-        "Sua tarefa é transformar requisitos de software em documentação detalhada e estruturada em Markdown, " +
-        "adequada para ser publicada no Docusaurus.\n\nA documentação gerada deve conter:\n- **Título do deliverable**" +
-        "\n- **Descrição detalhada** do requisito\n- **Objetivo e impacto no sistema**\n- **Pré-requisitos ou dependências**, " +
-        "caso existam\n- **Critérios de aceitação**, se aplicáveis\n- **Fluxo de funcionamento esperado**\n- **Exemplo de uso**, " +
-        "se relevante\n- **Possíveis erros e como evitá-los**\n\n**Formato Markdown:**\n- Use `#` para títulos, `##` para subtítulos e " +
-        "`###` para seções internas.\n- Utilize listas e tabelas sempre que possível.\n- O resultado deve ser um documento pronto para ser salvo como " +
-        "`.md` e publicado no Docusaurus.\n\nMantenha a documentação **clara, objetiva e bem estruturada**, " +
-        "garantindo que seja útil para desenvolvedores e stakeholders.";
-
+        "Você é um assistente especializado em análise de requisitos e geração de documentação técnica para software. " +
+        "Sua tarefa é transformar requisitos extraídos do Azure DevOps em documentação detalhada e estruturada, " +
+        "formatada para publicação no **Docusaurus**.\n\n" +
+        "**Diretrizes:**\n" +
+        "- Use **Markdown** (`#` para títulos, `##` para subtítulos, `###` para seções internas).\n" +
+        "- Utilize `<details><summary>` para seções colapsáveis quando necessário.\n" +
+        "- Apresente **tabelas bem formatadas** para critérios de aceitação e dependências.\n" +
+        "- Mantenha a estrutura hierárquica entre deliverables e subdeliverables.\n\n" +
+        "**Seções esperadas:**\n" +
+        "1. **Título do deliverable**\n" +
+        "2. **Descrição detalhada**\n" +
+        "3. **Objetivo e impacto no sistema**\n" +
+        "4. **Pré-requisitos ou dependências**\n" +
+        "5. **Critérios de aceitação**\n" +
+        "6. **Fluxo esperado**\n\n" +
+        "**Exemplo de Formatação:**\n" +
+        "```md\n" +
+        "# Título do Deliverable\n" +
+        "## Descrição\n" +
+        "Aqui está a descrição detalhada...\n\n" +
+        "<details>\n" +
+        "<summary>Critérios de Aceitação</summary>\n\n" +
+        "| Critério  | Descrição |\n" +
+        "|-----------|------------|\n" +
+        "| 1  | O sistema deve validar X antes de permitir Y |\n" +
+        "</details>\n\n" +
+        "## Fluxo Esperado\n" +
+        "1. O usuário faz isso.\n" +
+        "2. O sistema responde assim.\n" +
+        "```\n" +
+        "Mantenha a documentação **clara, objetiva e bem estruturada** para facilitar o uso por desenvolvedores e stakeholders.";
+    
     public ChatGptService(string token)
     {
         _httpClient = new HttpClient();
